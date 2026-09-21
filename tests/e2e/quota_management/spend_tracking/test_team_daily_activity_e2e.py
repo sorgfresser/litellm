@@ -87,8 +87,8 @@ class TestTeamDailyActivity:
         Subject(
             domain=Domain.SPEND_BUDGETS,
             route=Route.SPEND_REPORTING,
-            provider=Provider.OPENAI,
-            model="openai/gpt-5.6-luna",
+            providers=(Provider.OPENAI,),
+            models=("openai/gpt-5.6-luna",),
         )
     )
     def test_valid_date_range_returns_results_and_metadata(

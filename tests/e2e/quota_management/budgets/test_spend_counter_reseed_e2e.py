@@ -149,8 +149,8 @@ def _accumulate(client: BudgetClient, key: str, count: int) -> None:
     Subject(
         domain=Domain.SPEND_BUDGETS,
         route=Route.CHAT_COMPLETIONS,
-        provider=Provider.ANTHROPIC,
-        model=MODEL,
+        providers=(Provider.ANTHROPIC,),
+        models=(MODEL,),
         mode=Mode.NONSTREAM,
     )
 )

@@ -127,8 +127,8 @@ class TestCacheCostAccounting:
         Subject(
             domain=Domain.SPEND_BUDGETS,
             route=Route.CHAT_COMPLETIONS,
-            provider=Provider.OPENAI,
-            model=CACHE_WRITE_BACKEND,
+            providers=(Provider.OPENAI,),
+            models=(CACHE_WRITE_BACKEND,),
             capabilities=(Capability.PROMPT_CACHING,),
             mode=Mode.NONSTREAM,
         )
@@ -167,8 +167,8 @@ class TestCacheCostAccounting:
         Subject(
             domain=Domain.SPEND_BUDGETS,
             route=Route.CHAT_COMPLETIONS,
-            provider=Provider.OPENAI,
-            model=CACHE_WRITE_BACKEND,
+            providers=(Provider.OPENAI,),
+            models=(CACHE_READ_BACKEND,),
             capabilities=(Capability.PROMPT_CACHING, Capability.REASONING),
             mode=Mode.NONSTREAM,
         )
@@ -241,8 +241,8 @@ class TestCacheCostAccounting:
         Subject(
             domain=Domain.SPEND_BUDGETS,
             route=Route.CHAT_COMPLETIONS,
-            provider=Provider.OPENAI,
-            model=CACHE_READ_BACKEND,
+            providers=(Provider.OPENAI,),
+            models=(CACHE_READ_BACKEND,),
             capabilities=(Capability.PROMPT_CACHING,),
             mode=Mode.STREAM,
         )
@@ -282,8 +282,8 @@ class TestCacheCostAccounting:
         Subject(
             domain=Domain.SPEND_BUDGETS,
             route=Route.MESSAGES,
-            provider=Provider.OPENAI,
-            model=BRIDGE_BACKEND,
+            providers=(Provider.OPENAI,),
+            models=(BRIDGE_BACKEND,),
             capabilities=(Capability.PROMPT_CACHING,),
             mode=Mode.NONSTREAM,
         )

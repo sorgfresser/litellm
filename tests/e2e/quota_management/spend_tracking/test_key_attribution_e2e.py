@@ -62,6 +62,7 @@ EMBED_MODEL: Final = "openai-text-embedding-3-small"
 BATCH_MODEL: Final = "openai-gpt-4o-mini"
 BATCH_BACKEND_MODEL: Final = "gpt-4o-mini"
 BATCH_PROVIDER: Final = "openai"
+DRIVEN_MODELS: Final = (CHAT_MODEL, MESSAGES_MODEL, RESPONSES_MODEL, EMBED_MODEL, BATCH_MODEL)
 HEALTH_SERVICE_ACCOUNT: Final = "litellm-internal-health-check"
 BATCH_TERMINAL_STATUSES: Final = frozenset({"completed", "failed", "cancelled", "expired"})
 FAILED_BATCH_POLL_SECONDS: Final = 120.0
@@ -286,6 +287,8 @@ class TestKeyAttribution:
         Subject(
             domain=Domain.SPEND_BUDGETS,
             route=Route.SPEND_REPORTING,
+            providers=(Provider.GEMINI, Provider.ANTHROPIC, Provider.OPENAI),
+            models=DRIVEN_MODELS,
         )
     )
     def test_every_write_path_row_joins_the_key(self, client: SpendClient, driven: DrivenKey) -> None:
@@ -328,6 +331,8 @@ class TestKeyAttribution:
         Subject(
             domain=Domain.SPEND_BUDGETS,
             route=Route.SPEND_REPORTING,
+            providers=(Provider.GEMINI, Provider.ANTHROPIC, Provider.OPENAI),
+            models=DRIVEN_MODELS,
         )
     )
     def test_spend_logs_by_key_return_every_row_with_the_alias(self, client: SpendClient, driven: DrivenKey) -> None:
@@ -362,6 +367,8 @@ class TestKeyAttribution:
         Subject(
             domain=Domain.SPEND_BUDGETS,
             route=Route.SPEND_REPORTING,
+            providers=(Provider.GEMINI, Provider.ANTHROPIC, Provider.OPENAI),
+            models=DRIVEN_MODELS,
         )
     )
     def test_user_daily_activity_reports_alias_and_email(self, client: SpendClient, driven: DrivenKey) -> None:
@@ -390,6 +397,8 @@ class TestKeyAttribution:
         Subject(
             domain=Domain.SPEND_BUDGETS,
             route=Route.HEALTH,
+            providers=(Provider.GEMINI,),
+            models=(CHAT_MODEL,),
         )
     )
     def test_health_check_rows_keep_the_service_account_key(self, client: SpendClient) -> None:
@@ -409,8 +418,8 @@ class TestKeyAttribution:
         Subject(
             domain=Domain.SPEND_BUDGETS,
             route=Route.BATCHES,
-            provider=Provider.OPENAI,
-            model=BATCH_MODEL,
+            providers=(Provider.OPENAI,),
+            models=(BATCH_MODEL,),
             mode=Mode.BATCH,
         )
     )

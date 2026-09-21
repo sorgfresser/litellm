@@ -3,8 +3,8 @@
 Two halves, deliberately separated.
 
 The DECLARED half is `Subject`: one frozen dataclass passed as the single
-positional argument of `@meta(...)`. Every field is a closed enum (or a free
-string for `model`), so a typo is a basedpyright error at the call site rather
+positional argument of `@meta(...)`. Every field is a closed enum (or free
+strings for `models`), so a typo is a basedpyright error at the call site rather
 than a silently dropped property. `dataclasses.asdict()` turns the whole thing
 into <property> pairs with no per-field plumbing -- adding a scalar field later
 needs zero serializer changes.
@@ -29,7 +29,7 @@ from __future__ import annotations
 
 import threading
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from enum import Enum
 from functools import wraps
 from typing import Final, ParamSpec, TypeVar, cast
@@ -79,10 +79,12 @@ class Route(str, Enum):
     images_generations + images_edits -> IMAGES, audio_speech +
     audio_transcriptions -> AUDIO, bedrock_native + google_native ->
     PASSTHROUGH. Those splits are wire detail, not a customer-facing surface,
-    and `model` + `capabilities` already carry them.
+    and `models` + `capabilities` already carry them.
+
+    The last four are ops surfaces: logging/, load/, other/ and ui/ have no LLM
+    route of their own and would otherwise have to lie.
     """
 
-    # Core: each is the subject of many e2e tests.
     CHAT_COMPLETIONS = "chat_completions"
     MESSAGES = "messages"
     RESPONSES = "responses"
@@ -97,8 +99,6 @@ class Route(str, Enum):
     TEAM_MANAGEMENT = "team_management"
     SPEND_REPORTING = "spend_reporting"
     MODEL_MANAGEMENT = "model_management"
-
-    # Long tail: real, but one or two test files each.
     IMAGES = "images"
     AUDIO = "audio"
     MODERATIONS = "moderations"
@@ -109,9 +109,6 @@ class Route(str, Enum):
     A2A = "a2a"
     USER_MANAGEMENT = "user_management"
     BUDGET_MANAGEMENT = "budget_management"
-
-    # Ops surfaces. logging/, load/, other/ and ui/ have no LLM route of their
-    # own and would otherwise have to lie.
     HEALTH = "health"
     METRICS = "metrics"
     PROXY_CONFIG = "proxy_config"
@@ -212,6 +209,52 @@ class Mode(str, Enum):
     WEBSOCKET = "websocket"
 
 
+_M = TypeVar("_M")
+
+
+def _scalar(value: object) -> str:
+    """`str(member)` on a (str, Enum) gives 'Route.RESPONSES', not 'responses'
+    -- StrEnum would not, but it is 3.11+ and this repo floors at 3.10. So the
+    value is read explicitly, once, for every enum field."""
+    if isinstance(value, Enum):
+        return str(value.value)  # pyright: ignore[reportAny]  # Enum.value is Any for every enum
+    return str(value)
+
+
+def _members(value: object) -> tuple[object, ...] | None:
+    """The elements of a plural field, or None for anything that is not a tuple.
+
+    Both callers hold the value as a plain object: `_canonical` because a call
+    site can pass anything at runtime, the serializer because `asdict` hands the
+    tuple back inside an untyped dict. The elements are re-declared as plain
+    objects here and converted by `_scalar` like any other value.
+    """
+    return cast("tuple[object, ...]", value) if isinstance(value, tuple) else None
+
+
+def _canonical(name: str, value: object, member_type: type[_M]) -> tuple[_M, ...]:
+    """A plural field's members: validated, deduped, and sorted by the value
+    they serialize to.
+
+    `models=("gpt-5.5")` is a str, not a tuple, and iterating it would declare
+    one model per character. Anything that is not a tuple is refused here, which
+    runs where the decorator does: at import, so pytest reports a collection
+    error naming the file instead of shipping garbage properties. An empty
+    string member is dropped rather than refused, because `models` is fed from
+    env-overridable constants and a blank override must not break collection.
+    """
+    members = _members(value)
+    if members is None:
+        raise TypeError(
+            f"Subject.{name} must be a tuple, got {type(value).__name__}: {value!r}."
+            f" A one-member tuple needs its trailing comma: {name}=(x,), not {name}=(x)"
+        )
+    typed = tuple(member for member in members if isinstance(member, member_type))
+    if len(typed) != len(members):
+        raise TypeError(f"Subject.{name} takes {member_type.__name__} members, got {value!r}")
+    return tuple(sorted(frozenset(member for member in typed if _scalar(member)), key=_scalar))
+
+
 @dataclass(frozen=True, slots=True)
 class Subject:
     """What a test is about.
@@ -220,24 +263,29 @@ class Subject:
     backfill of the existing ~908 tests comes later. Named `Subject` rather than
     `TestMeta` because pytest tries to collect any imported class named `Test*`
     and would warn in every one of the ~570 modules that import it.
+
+    `providers`, `models` and `capabilities` are plural because one test node
+    routinely drives several: the claude_code matrix runs haiku, sonnet and opus
+    in a single body, and a spend test calls two providers on one key. Each is
+    an independent set. No positional pairing is implied between `providers` and
+    `models` (one provider x three models is the common case), and none could
+    survive anyway, since each tuple is deduped and sorted on its own.
     """
 
     domain: Domain | None = None
     route: Route | None = None
-    provider: Provider | None = None
-    model: str | None = None
+    providers: tuple[Provider, ...] = ()
+    models: tuple[str, ...] = ()
     capabilities: tuple[Capability, ...] = ()
     mode: Mode | None = None
 
     def __post_init__(self) -> None:
-        """Canonicalize capabilities at declaration: deduped and sorted by
-        value, so the committed run files diff cleanly however a test spelled
-        the tuple, and the serializer stays field-agnostic."""
-        object.__setattr__(
-            self,
-            "capabilities",
-            tuple(sorted(dict.fromkeys(self.capabilities), key=lambda c: c.value)),
-        )
+        """Canonicalize every plural field at declaration, so the committed run
+        files diff cleanly however a test spelled the tuple, and the serializer
+        stays field-agnostic."""
+        object.__setattr__(self, "providers", _canonical("providers", self.providers, Provider))
+        object.__setattr__(self, "models", _canonical("models", self.models, str))
+        object.__setattr__(self, "capabilities", _canonical("capabilities", self.capabilities, Capability))
 
 
 def meta(subject: Subject) -> pytest.MarkDecorator:
@@ -255,13 +303,9 @@ def meta(subject: Subject) -> pytest.MarkDecorator:
     return pytest.mark.meta(subject)
 
 
-# --- The recorded half: steps -------------------------------------------------
-
 _P = ParamSpec("_P")
 _R = TypeVar("_R")
 
-# A retrying helper (poll_cost_row) or a load test calling a decorated helper in
-# a loop would otherwise emit thousands of <property> entries per testcase.
 MAX_STEPS: Final = 50
 MAX_STEP_CHARS: Final = 200
 
@@ -280,16 +324,23 @@ class _StepRecorder:
         self._steps: list[str] = []
 
     def reset(self) -> None:
-        """Called by an autouse fixture at setup, so each test starts empty."""
+        """Called first thing in every test's setup phase, so each test starts
+        empty."""
         with self._lock:
             self._steps.clear()
 
     def record(self, label: str) -> None:
+        """Append `label`, unless it repeats the previous step or the log is full.
+
+        A retrying helper (poll_cost_row) or a load test calling a decorated
+        helper in a loop would otherwise emit thousands of <property> entries per
+        testcase: a consecutive repeat collapses, so a poll loop is one step in
+        the story rather than fifty, and the log stops growing at MAX_STEPS.
+        """
         cleaned = " ".join(label.split())[:MAX_STEP_CHARS]
         if not cleaned:
             return
         with self._lock:
-            # A poll loop is one step in the story, not fifty.
             if self._steps and self._steps[-1] == cleaned:
                 return
             if len(self._steps) >= MAX_STEPS:
@@ -324,33 +375,7 @@ def step(label: str) -> Callable[[Callable[_P, _R]], Callable[_P, _R]]:
     return decorate
 
 
-# --- Serialization: asdict() -> <property> pairs, no per-field plumbing -------
-
-# The only field-specific knowledge in the module: which fields are plural, and
-# what their repeated <property> is called. A new SCALAR field needs no edit.
-_REPEATED: Final[dict[str, str]] = {"capabilities": "capability"}
-
-
-def _scalar(value: object) -> str:
-    """`str(member)` on a (str, Enum) gives 'Route.RESPONSES', not 'responses'
-    -- StrEnum would not, but it is 3.11+ and this repo floors at 3.10. So the
-    value is read explicitly, once, for every enum field."""
-    if isinstance(value, Enum):
-        # `Enum.value` is `Any` by construction, for every enum there has ever
-        # been; this is the one place in the module that reads it, and `str()`
-        # lands it back in the type system immediately.
-        return str(value.value)  # pyright: ignore[reportAny]  # Enum.value is Any for every enum
-    return str(value)
-
-
-def _members(value: object) -> tuple[object, ...]:
-    """The elements of a plural field, whatever `asdict` rebuilt it as.
-
-    `asdict` reconstructs a tuple field as a tuple of the same members, but hands
-    it back inside an untyped dict, so the elements are re-declared as plain
-    objects here and converted by `_scalar` like any other value.
-    """
-    return cast("tuple[object, ...]", value) if isinstance(value, tuple) else ()
+_REPEATED: Final[dict[str, str]] = {"providers": "provider", "models": "model", "capabilities": "capability"}
 
 
 def _declared_subject(args: tuple[object, ...]) -> Subject | None:
@@ -366,10 +391,13 @@ def _declared_subject(args: tuple[object, ...]) -> Subject | None:
 
 
 def subject_properties(item: pytest.Item) -> tuple[tuple[str, str], ...]:
-    """The declared half, in dataclass field order. Empty fields emit nothing;
-    the emitter is what guarantees every key exists in the JSON."""
-    from dataclasses import asdict  # local: keeps module import trivially cheap
+    """The declared half, in dataclass field order.
 
+    `_REPEATED` is the only field-specific knowledge here: which fields are
+    plural, and the SINGULAR name their repeated <property> goes out under. A new
+    scalar field needs no edit. Empty fields emit nothing; the emitter is what
+    guarantees every key exists in the JSON, with `providers` and `models` as
+    `[]` when nothing was declared."""
     marker = item.get_closest_marker("meta")
     if marker is None:
         return ()
@@ -381,12 +409,13 @@ def subject_properties(item: pytest.Item) -> tuple[tuple[str, str], ...]:
     for name, value in fields.items():
         repeated = _REPEATED.get(name)
         if repeated is not None:
-            pairs.extend((repeated, _scalar(member)) for member in _members(value))
+            pairs.extend((repeated, _scalar(member)) for member in _members(value) or ())
         elif value is not None and value != "":
             pairs.append((name, _scalar(value)))
     return tuple(pairs)
 
 
 def step_properties() -> tuple[tuple[str, str], ...]:
-    """The recorded half. Appended after the call phase, never at collection."""
+    """The recorded half. Appended after the setup and call phases, never at
+    collection."""
     return tuple(("step", label) for label in STEPS.taken())

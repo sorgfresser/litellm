@@ -97,8 +97,8 @@ def test_key_with_budget_duration_schedules_reset_at_creation(client: BudgetClie
     Subject(
         domain=Domain.SPEND_BUDGETS,
         route=Route.CHAT_COMPLETIONS,
-        provider=Provider.ANTHROPIC,
-        model="claude-haiku-4-5",
+        providers=(Provider.ANTHROPIC,),
+        models=("claude-haiku-4-5",),
         mode=Mode.NONSTREAM,
     )
 )
@@ -123,8 +123,8 @@ def test_key_spend_blocks_at_cap(client: BudgetClient, resources: ResourceManage
     Subject(
         domain=Domain.SPEND_BUDGETS,
         route=Route.CHAT_COMPLETIONS,
-        provider=Provider.ANTHROPIC,
-        model="claude-haiku-4-5",
+        providers=(Provider.ANTHROPIC,),
+        models=("claude-haiku-4-5",),
         mode=Mode.NONSTREAM,
     )
 )
@@ -168,8 +168,8 @@ def test_key_budget_reset_at_advances_after_window(client: BudgetClient, resourc
     Subject(
         domain=Domain.SPEND_BUDGETS,
         route=Route.CHAT_COMPLETIONS,
-        provider=Provider.ANTHROPIC,
-        model="claude-haiku-4-5",
+        providers=(Provider.ANTHROPIC,),
+        models=("claude-haiku-4-5",),
         mode=Mode.NONSTREAM,
     )
 )
@@ -221,8 +221,8 @@ def test_multi_window_key_resets_each_window_independently(client: BudgetClient,
     Subject(
         domain=Domain.SPEND_BUDGETS,
         route=Route.CHAT_COMPLETIONS,
-        provider=Provider.ANTHROPIC,
-        model="claude-haiku-4-5",
+        providers=(Provider.ANTHROPIC,),
+        models=("claude-haiku-4-5",),
         mode=Mode.NONSTREAM,
     )
 )
@@ -263,8 +263,8 @@ def test_team_member_budget_reset_at_advances(client: BudgetClient, resources: R
     Subject(
         domain=Domain.SPEND_BUDGETS,
         route=Route.CHAT_COMPLETIONS,
-        provider=Provider.ANTHROPIC,
-        model="claude-haiku-4-5",
+        providers=(Provider.ANTHROPIC,),
+        models=("claude-haiku-4-5",),
         mode=Mode.NONSTREAM,
     )
 )

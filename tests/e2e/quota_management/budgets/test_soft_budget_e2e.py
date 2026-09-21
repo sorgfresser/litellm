@@ -23,8 +23,8 @@ pytestmark = pytest.mark.e2e
     Subject(
         domain=Domain.SPEND_BUDGETS,
         route=Route.CHAT_COMPLETIONS,
-        provider=Provider.ANTHROPIC,
-        model="claude-haiku-4-5",
+        providers=(Provider.ANTHROPIC,),
+        models=("claude-haiku-4-5",),
         mode=Mode.NONSTREAM,
     )
 )

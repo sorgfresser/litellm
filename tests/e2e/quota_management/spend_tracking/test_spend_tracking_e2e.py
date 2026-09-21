@@ -67,8 +67,8 @@ def _require_row(
     Subject(
         domain=Domain.SPEND_BUDGETS,
         route=Route.CHAT_COMPLETIONS,
-        provider=Provider.GEMINI,
-        model="gemini-2.5-flash",
+        providers=(Provider.GEMINI,),
+        models=("gemini-2.5-flash",),
         mode=Mode.NONSTREAM,
     )
 )
@@ -111,8 +111,8 @@ def test_chat_completion_writes_nonzero_spend_row(
     Subject(
         domain=Domain.SPEND_BUDGETS,
         route=Route.CHAT_COMPLETIONS,
-        provider=Provider.GEMINI,
-        model="gemini-2.5-flash",
+        providers=(Provider.GEMINI,),
+        models=("gemini-2.5-flash",),
         mode=Mode.STREAM,
     )
 )
@@ -148,8 +148,8 @@ def test_streaming_chat_completion_tracks_spend(
     Subject(
         domain=Domain.SPEND_BUDGETS,
         route=Route.MESSAGES,
-        provider=Provider.OPENAI,
-        model="openai-responses-codex",
+        providers=(Provider.OPENAI,),
+        models=("openai-responses-codex",),
         mode=Mode.STREAM,
     )
 )
@@ -227,8 +227,8 @@ def test_streaming_messages_via_responses_bridge_tracks_spend(
     Subject(
         domain=Domain.SPEND_BUDGETS,
         route=Route.EMBEDDINGS,
-        provider=Provider.OPENAI,
-        model="openai-text-embedding-3-small",
+        providers=(Provider.OPENAI,),
+        models=("openai-text-embedding-3-small",),
         mode=Mode.NONSTREAM,
     )
 )
@@ -259,8 +259,8 @@ def test_embedding_writes_nonzero_spend_row(
     Subject(
         domain=Domain.SPEND_BUDGETS,
         route=Route.CHAT_COMPLETIONS,
-        provider=Provider.GEMINI,
-        model="gemini-2.5-flash",
+        providers=(Provider.GEMINI,),
+        models=("gemini-2.5-flash",),
         mode=Mode.NONSTREAM,
     )
 )
@@ -304,8 +304,8 @@ def test_cache_hit_is_zero_cost_and_suffixed(
     Subject(
         domain=Domain.SPEND_BUDGETS,
         route=Route.CHAT_COMPLETIONS,
-        provider=Provider.GEMINI,
-        model="gemini-2.5-flash",
+        providers=(Provider.GEMINI,),
+        models=("gemini-2.5-flash",),
         mode=Mode.NONSTREAM,
     )
 )
@@ -341,8 +341,8 @@ def test_key_spend_equals_sum_of_logs(client: SpendClient, scoped_key: str) -> N
     Subject(
         domain=Domain.SPEND_BUDGETS,
         route=Route.CHAT_COMPLETIONS,
-        provider=Provider.OPENAI,
-        model="openai/gpt-5.6-luna",
+        providers=(Provider.OPENAI,),
+        models=("openai/gpt-5.6-luna",),
         mode=Mode.NONSTREAM,
     )
 )
@@ -367,8 +367,8 @@ def test_burst_of_concurrent_calls_loses_no_spend(
     Subject(
         domain=Domain.SPEND_BUDGETS,
         route=Route.CHAT_COMPLETIONS,
-        provider=Provider.GEMINI,
-        model="gemini-2.5-flash",
+        providers=(Provider.GEMINI,),
+        models=("gemini-2.5-flash",),
         mode=Mode.NONSTREAM,
     )
 )
@@ -429,8 +429,8 @@ def test_spend_logs_v2_pagination_caps_pages_and_keeps_total(
     Subject(
         domain=Domain.SPEND_BUDGETS,
         route=Route.CHAT_COMPLETIONS,
-        provider=Provider.GEMINI,
-        model="gemini-2.5-flash",
+        providers=(Provider.GEMINI,),
+        models=("gemini-2.5-flash",),
         mode=Mode.NONSTREAM,
     )
 )
@@ -455,8 +455,8 @@ def test_request_tags_round_trip(client: SpendClient, scoped_key: str) -> None:
     Subject(
         domain=Domain.SPEND_BUDGETS,
         route=Route.CHAT_COMPLETIONS,
-        provider=Provider.GEMINI,
-        model="gemini-2.5-flash",
+        providers=(Provider.GEMINI,),
+        models=("gemini-2.5-flash",),
         mode=Mode.NONSTREAM,
     )
 )
@@ -502,8 +502,8 @@ def test_tag_spend_matches_sum_of_tagged_logs(
     Subject(
         domain=Domain.SPEND_BUDGETS,
         route=Route.CHAT_COMPLETIONS,
-        provider=Provider.GEMINI,
-        model="gemini-2.5-flash",
+        providers=(Provider.GEMINI,),
+        models=("gemini-2.5-flash",),
         mode=Mode.NONSTREAM,
     )
 )
@@ -529,8 +529,8 @@ def test_end_user_spend_attributed_on_row(
     Subject(
         domain=Domain.SPEND_BUDGETS,
         route=Route.CHAT_COMPLETIONS,
-        provider=Provider.GEMINI,
-        model="gemini-2.5-flash",
+        providers=(Provider.GEMINI, Provider.ANTHROPIC),
+        models=("gemini-2.5-flash", "claude-haiku-4-5"),
         mode=Mode.NONSTREAM,
     )
 )
@@ -587,8 +587,8 @@ def test_each_model_on_a_shared_key_gets_its_own_row(
     Subject(
         domain=Domain.SPEND_BUDGETS,
         route=Route.CHAT_COMPLETIONS,
-        provider=Provider.OPENAI,
-        model="openai/gpt-5.5",
+        providers=(Provider.OPENAI,),
+        models=("openai/gpt-5.5",),
         mode=Mode.NONSTREAM,
     )
 )
@@ -621,8 +621,8 @@ def test_failure_call_writes_failure_status_row(
     Subject(
         domain=Domain.SPEND_BUDGETS,
         route=Route.SPEND_REPORTING,
-        provider=Provider.GEMINI,
-        model="gemini-2.5-flash",
+        providers=(Provider.GEMINI,),
+        models=("gemini-2.5-flash",),
     )
 )
 def test_spend_calculate_returns_nonzero_cost(client: SpendClient) -> None:
@@ -639,8 +639,8 @@ def test_spend_calculate_returns_nonzero_cost(client: SpendClient) -> None:
     Subject(
         domain=Domain.SPEND_BUDGETS,
         route=Route.CHAT_COMPLETIONS,
-        provider=Provider.GEMINI,
-        model="gemini-2.5-flash",
+        providers=(Provider.GEMINI,),
+        models=("gemini-2.5-flash",),
         mode=Mode.NONSTREAM,
     )
 )

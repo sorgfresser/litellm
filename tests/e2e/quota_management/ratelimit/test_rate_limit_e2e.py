@@ -181,8 +181,8 @@ class TestKeyRateLimits:
         Subject(
             domain=Domain.SPEND_BUDGETS,
             route=Route.CHAT_COMPLETIONS,
-            provider=Provider.ANTHROPIC,
-            model=CHEAP_ANTHROPIC_MODEL,
+            providers=(Provider.ANTHROPIC,),
+            models=(CHEAP_ANTHROPIC_MODEL,),
             mode=Mode.NONSTREAM,
         )
     )
@@ -202,8 +202,8 @@ class TestKeyRateLimits:
         Subject(
             domain=Domain.SPEND_BUDGETS,
             route=Route.CHAT_COMPLETIONS,
-            provider=Provider.ANTHROPIC,
-            model=CHEAP_ANTHROPIC_MODEL,
+            providers=(Provider.ANTHROPIC,),
+            models=(CHEAP_ANTHROPIC_MODEL,),
             mode=Mode.NONSTREAM,
         )
     )
@@ -230,8 +230,8 @@ class TestKeyRateLimits:
         Subject(
             domain=Domain.SPEND_BUDGETS,
             route=Route.CHAT_COMPLETIONS,
-            provider=Provider.ANTHROPIC,
-            model=CHEAP_ANTHROPIC_MODEL,
+            providers=(Provider.ANTHROPIC,),
+            models=(CHEAP_ANTHROPIC_MODEL,),
             mode=Mode.NONSTREAM,
         )
     )
@@ -264,8 +264,8 @@ class TestKeyRateLimits:
         Subject(
             domain=Domain.SPEND_BUDGETS,
             route=Route.CHAT_COMPLETIONS,
-            provider=Provider.ANTHROPIC,
-            model=CHEAP_ANTHROPIC_MODEL,
+            providers=(Provider.ANTHROPIC,),
+            models=(CHEAP_ANTHROPIC_MODEL,),
             mode=Mode.NONSTREAM,
         )
     )

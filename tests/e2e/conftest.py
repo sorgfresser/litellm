@@ -113,7 +113,7 @@ def pytest_configure(config: pytest.Config) -> None:
     config.addinivalue_line(
         "markers",
         "meta(subject): typed e2e_metadata.Subject describing what this test drives"
-        " (domain/route/provider/model/capabilities/mode); attach it with @meta(Subject(...))",
+        " (domain/route/providers/models/capabilities/mode); attach it with @meta(Subject(...))",
     )
     config.addinivalue_line(
         "markers",
@@ -238,7 +238,14 @@ def pytest_runtest_setup(item: pytest.Item) -> None:
     """Hard-fail `e2e`-marked tests unless a proxy answers its liveness probe.
     Unmarked tests (unit coverage of the harness) don't touch the proxy, so they
     run even when none is up. Never skip for a missing proxy. Replay mode needs
-    the proxy too: only provider-bound traffic replays from the bundle."""
+    the proxy too: only provider-bound traffic replays from the bundle.
+
+    Also empties the step log, so the story a test tells is its own. It happens
+    here, first in the setup phase, rather than in a fixture: a fixture only runs
+    once every wider-scoped fixture ahead of it has been set up, so a step a
+    module-scoped finalizer recorded after the previous test would still be in
+    the log when this test's setup dies early, and would be reported as its own."""
+    STEPS.reset()
     LIVE_PROVIDER_REQUIRED.set(item.get_closest_marker("provider_live") is not None)
     if item.get_closest_marker("e2e") is None or item.get_closest_marker("migration_startup") is not None:
         return
@@ -269,9 +276,19 @@ def pytest_runtest_makereport(
 
     The steps cannot ride along with the other properties in
     `pytest_collection_modifyitems`: that hook runs before any test body has, so
-    the recorder is empty there. They are attached on every call-phase outcome,
-    failures included -- a failing test's last step is where it died, which is the
-    whole reason the field exists.
+    the recorder is empty there. They are attached after setup and again after
+    call, on every outcome -- a failing test's last step is where it died, which
+    is the whole reason the field exists. Setup has to attach too because a test
+    whose fixture raises never reaches the call phase, and setup is where an e2e
+    test most often dies (proxy not ready, key creation failing). The second
+    attach replaces the first, so nothing is doubled. JUnit writes properties
+    from the teardown report, which pytest builds from `item.user_properties`
+    after both of these have run.
+
+    Teardown deliberately does not attach. Steps recorded by fixture finalizers
+    are cleanup, and appending them would put "delete virtual key" after the step
+    a failing test died on, which breaks the one guarantee the field makes. A
+    finalizer that raises is still reported by JUnit with its own traceback.
     """
     report = yield
     if item.get_closest_marker("mcp_oauth_live") is not None and call.excinfo is not None:
@@ -283,6 +300,7 @@ def pytest_runtest_makereport(
         report.user_properties = list(item.user_properties)
     if report.when == "call":
         item.stash[_CALL_PASSED] = report.passed
+    if report.when in ("setup", "call"):
         attach_step_properties(item)
     return report
 
@@ -318,21 +336,6 @@ def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> None:
         e2e_test_ran=session.stash.get(_E2E_TEST_RAN, False),
         truncate=reset_spend_logs,
     )
-
-
-@pytest.fixture(autouse=True)
-def _record_steps() -> Iterator[None]:  # pyright: ignore[reportUnusedFunction]  # autouse: nothing names it
-    """Empty the step log before each test, so the story a test tells is its own.
-
-    Autouse and unconditional: the recorder is written by @step-decorated harness
-    helpers, which a test reaches through fixtures as readily as through its own
-    body, so setup-phase steps have to be kept too. The log is read after the call
-    phase by `pytest_runtest_makereport`; a test that dies partway keeps the
-    partial list, which is the point -- its last element is where it died.
-    """
-    STEPS.reset()
-    yield
-    STEPS.reset()
 
 
 @pytest.fixture(scope="session")

@@ -57,8 +57,8 @@ def _drive_to_block(client: BudgetClient, key: str) -> StreamingResponse:
     Subject(
         domain=Domain.SPEND_BUDGETS,
         route=Route.CHAT_COMPLETIONS,
-        provider=Provider.ANTHROPIC,
-        model="claude-haiku-4-5",
+        providers=(Provider.ANTHROPIC,),
+        models=("claude-haiku-4-5",),
         mode=Mode.NONSTREAM,
     )
 )
@@ -99,8 +99,8 @@ def test_team_short_window_blocks_then_resets(client: BudgetClient, resources: R
     Subject(
         domain=Domain.SPEND_BUDGETS,
         route=Route.CHAT_COMPLETIONS,
-        provider=Provider.ANTHROPIC,
-        model="claude-haiku-4-5",
+        providers=(Provider.ANTHROPIC,),
+        models=("claude-haiku-4-5",),
         mode=Mode.NONSTREAM,
     )
 )

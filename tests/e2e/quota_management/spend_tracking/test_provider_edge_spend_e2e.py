@@ -27,8 +27,8 @@ pytestmark = [pytest.mark.e2e, pytest.mark.replayable]
     Subject(
         domain=Domain.SPEND_BUDGETS,
         route=Route.CHAT_COMPLETIONS,
-        provider=Provider.OPENAI,
-        model=f"openai/{CHEAP_OPENAI_MODEL}",
+        providers=(Provider.OPENAI,),
+        models=(f"openai/{CHEAP_OPENAI_MODEL}",),
         mode=Mode.NONSTREAM,
     )
 )

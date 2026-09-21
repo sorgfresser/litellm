@@ -62,8 +62,8 @@ def _drive_to_block(client: BudgetClient, key: str) -> StreamingResponse:
     Subject(
         domain=Domain.SPEND_BUDGETS,
         route=Route.CHAT_COMPLETIONS,
-        provider=Provider.OPENAI,
-        model=CHEAP_OPENAI_MODEL,
+        providers=(Provider.OPENAI,),
+        models=(CHEAP_OPENAI_MODEL,),
         mode=Mode.NONSTREAM,
     )
 )
@@ -104,8 +104,8 @@ def test_short_window_blocks_then_resets(client: BudgetClient, resources: Resour
     Subject(
         domain=Domain.SPEND_BUDGETS,
         route=Route.CHAT_COMPLETIONS,
-        provider=Provider.OPENAI,
-        model=CHEAP_OPENAI_MODEL,
+        providers=(Provider.OPENAI,),
+        models=(CHEAP_OPENAI_MODEL,),
         mode=Mode.NONSTREAM,
     )
 )

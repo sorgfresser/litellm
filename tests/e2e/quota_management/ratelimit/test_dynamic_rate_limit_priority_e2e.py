@@ -162,8 +162,8 @@ class TestDynamicRateLimitPriority:
         Subject(
             domain=Domain.SPEND_BUDGETS,
             route=Route.CHAT_COMPLETIONS,
-            provider=Provider.ANTHROPIC,
-            model=BACKEND,
+            providers=(Provider.ANTHROPIC,),
+            models=(BACKEND,),
             mode=Mode.NONSTREAM,
         )
     )
@@ -213,8 +213,8 @@ class TestDynamicRateLimitPriority:
         Subject(
             domain=Domain.SPEND_BUDGETS,
             route=Route.CHAT_COMPLETIONS,
-            provider=Provider.ANTHROPIC,
-            model=BACKEND,
+            providers=(Provider.ANTHROPIC,),
+            models=(BACKEND,),
             mode=Mode.NONSTREAM,
         )
     )

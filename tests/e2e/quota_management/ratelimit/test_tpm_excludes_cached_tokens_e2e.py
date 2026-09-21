@@ -106,8 +106,8 @@ class TestTpmExcludesCachedTokens:
         Subject(
             domain=Domain.SPEND_BUDGETS,
             route=Route.CHAT_COMPLETIONS,
-            provider=Provider.ANTHROPIC,
-            model=ANTHROPIC_MODEL,
+            providers=(Provider.ANTHROPIC,),
+            models=(ANTHROPIC_MODEL,),
             capabilities=(Capability.PROMPT_CACHING,),
             mode=Mode.NONSTREAM,
         )

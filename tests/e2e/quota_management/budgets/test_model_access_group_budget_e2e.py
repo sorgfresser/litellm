@@ -107,8 +107,8 @@ class TestModelAccessGroupBudget:
         Subject(
             domain=Domain.SPEND_BUDGETS,
             route=Route.CHAT_COMPLETIONS,
-            provider=Provider.OPENAI,
-            model=BACKEND,
+            providers=(Provider.OPENAI,),
+            models=(BACKEND,),
             mode=Mode.NONSTREAM,
         )
     )
@@ -128,8 +128,8 @@ class TestModelAccessGroupBudget:
         Subject(
             domain=Domain.SPEND_BUDGETS,
             route=Route.CHAT_COMPLETIONS,
-            provider=Provider.OPENAI,
-            model=BACKEND,
+            providers=(Provider.OPENAI,),
+            models=(BACKEND,),
             mode=Mode.NONSTREAM,
         )
     )
@@ -150,8 +150,8 @@ class TestModelAccessGroupBudget:
         Subject(
             domain=Domain.SPEND_BUDGETS,
             route=Route.CHAT_COMPLETIONS,
-            provider=Provider.OPENAI,
-            model=BACKEND,
+            providers=(Provider.OPENAI,),
+            models=(BACKEND,),
             mode=Mode.NONSTREAM,
         )
     )
@@ -173,8 +173,8 @@ class TestModelAccessGroupBudget:
         Subject(
             domain=Domain.SPEND_BUDGETS,
             route=Route.BUDGET_MANAGEMENT,
-            provider=Provider.OPENAI,
-            model=BACKEND,
+            providers=(Provider.OPENAI,),
+            models=(BACKEND,),
         )
     )
     def test_the_budget_read_reports_the_spend_drawn_against_the_pool(

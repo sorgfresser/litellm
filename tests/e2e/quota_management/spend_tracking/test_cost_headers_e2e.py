@@ -65,8 +65,8 @@ class TestCostHeaders:
         Subject(
             domain=Domain.SPEND_BUDGETS,
             route=Route.CHAT_COMPLETIONS,
-            provider=Provider.OPENAI,
-            model=BACKEND,
+            providers=(Provider.OPENAI,),
+            models=(BACKEND,),
             mode=Mode.NONSTREAM,
         )
     )

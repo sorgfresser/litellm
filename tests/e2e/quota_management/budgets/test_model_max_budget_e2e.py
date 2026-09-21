@@ -35,8 +35,8 @@ def _call(client: BudgetClient, key: str, model: str):
     Subject(
         domain=Domain.SPEND_BUDGETS,
         route=Route.CHAT_COMPLETIONS,
-        provider=Provider.ANTHROPIC,
-        model=CAPPED_MODEL,
+        providers=(Provider.ANTHROPIC, Provider.GEMINI),
+        models=(CAPPED_MODEL, FREE_MODEL),
         mode=Mode.NONSTREAM,
     )
 )
@@ -75,8 +75,8 @@ def test_model_max_budget_isolates_per_model(
     Subject(
         domain=Domain.SPEND_BUDGETS,
         route=Route.CHAT_COMPLETIONS,
-        provider=Provider.GEMINI,
-        model=FREE_MODEL,
+        providers=(Provider.GEMINI,),
+        models=(FREE_MODEL,),
         mode=Mode.NONSTREAM,
     )
 )

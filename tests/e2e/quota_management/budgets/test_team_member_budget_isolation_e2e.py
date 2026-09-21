@@ -93,8 +93,8 @@ class TestTeamMemberBudgetIsolation:
         Subject(
             domain=Domain.SPEND_BUDGETS,
             route=Route.CHAT_COMPLETIONS,
-            provider=Provider.OPENAI,
-            model=MODEL,
+            providers=(Provider.OPENAI,),
+            models=(MODEL,),
             mode=Mode.NONSTREAM,
         )
     )

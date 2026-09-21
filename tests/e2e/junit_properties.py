@@ -118,17 +118,18 @@ def attach_result_properties(item: pytest.Item) -> None:
 
 
 def attach_step_properties(item: pytest.Item) -> None:
-    """Attach the runtime-recorded steps after the call phase.
+    """Attach the runtime-recorded steps; called after setup and after call.
 
     Separate from `attach_result_properties` because it cannot share its home:
     that one runs in `pytest_collection_modifyitems`, before any test body has
     executed, so the recorder is necessarily empty there.
 
-    Any `step` entries already on the item are dropped first. The suite runs with
-    `--reruns 1`, so a flaky test's second attempt would otherwise append a second
-    copy of the story behind the first, and the report would read as one very long
-    test that did everything twice. Last attempt wins, which is the attempt whose
-    outcome JUnit records.
+    Any `step` entries already on the item are dropped first, which is what makes
+    the second call of a test safe: the story attached after setup is replaced by
+    the longer one attached after call. It also covers `--reruns 1`, where a flaky
+    test's second attempt would otherwise append a second copy of the story behind
+    the first, and the report would read as one very long test that did everything
+    twice. Last attempt wins, which is the attempt whose outcome JUnit records.
     """
     item.user_properties[:] = [entry for entry in item.user_properties if entry[0] != "step"]
     item.user_properties.extend(step_properties())

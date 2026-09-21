@@ -84,8 +84,8 @@ class TestTeamMemberBudget:
         Subject(
             domain=Domain.SPEND_BUDGETS,
             route=Route.CHAT_COMPLETIONS,
-            provider=Provider.ANTHROPIC,
-            model=MODEL,
+            providers=(Provider.ANTHROPIC,),
+            models=(MODEL,),
             mode=Mode.NONSTREAM,
         )
     )
@@ -112,8 +112,8 @@ class TestTeamMemberBudget:
         Subject(
             domain=Domain.SPEND_BUDGETS,
             route=Route.CHAT_COMPLETIONS,
-            provider=Provider.ANTHROPIC,
-            model=MODEL,
+            providers=(Provider.ANTHROPIC,),
+            models=(MODEL,),
             mode=Mode.NONSTREAM,
         )
     )

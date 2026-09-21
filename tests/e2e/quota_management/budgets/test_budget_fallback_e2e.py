@@ -25,8 +25,8 @@ FALLBACK_MODEL = "gpt-5.5"
     Subject(
         domain=Domain.SPEND_BUDGETS,
         route=Route.MESSAGES,
-        provider=Provider.ANTHROPIC,
-        model=PRIMARY_MODEL,
+        providers=(Provider.ANTHROPIC, Provider.OPENAI),
+        models=(PRIMARY_MODEL, FALLBACK_MODEL),
         mode=Mode.NONSTREAM,
     )
 )
